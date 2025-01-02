@@ -2,6 +2,7 @@ import { Base } from './entities/base.js';
 import { Tower } from './entities/tower.js';
 import { Wall } from './entities/wall.js';
 import { Particle } from './entities/particle.js';
+import { TextParticle } from './entities/text-particle.js';
 import { Bomb } from './entities/bomb.js';
 import { BombTower } from './entities/bomb-tower.js';
 
@@ -176,6 +177,7 @@ class Game {
                 if (building) {
                     monster.attack(building);
                     this.createParticlesAtTile(5, nextPosition.x, nextPosition.y, "black");
+                    this.createTextParticlesAtTile(5, nextPosition.x, nextPosition.y);
                     if (building.hp <= 0) {
                         this.destroyBuilding(building);
                         this.invalidateAllPaths();
@@ -280,7 +282,7 @@ class Game {
         }
     }
 
-    createParticlesAtTile(amount, tileX, tileY, color = "red", aliveForTicks = 15) {
+    createParticles(generator, amount, tileX, tileY, color = "red", aliveForTicks = 15) {
         const x = tileX * this.tileSize + this.tileSize / 2;
         const y = tileY * this.tileSize + this.tileSize / 2;
 
@@ -305,12 +307,26 @@ class Game {
             const velocityY = (targetY - randomVelocityY) / velocityScale;
 
             this.entities.particles.push(
-                new Particle(x, y,
+                generator(x, y,
                     normalizedVelocityX + velocityX,
                     normalizedVelocityY + velocityY,
                     this.gameTicks, color, aliveForTicks
                 ));
         }
+    }
+
+    createParticlesAtTile(amount, tileX, tileY, color = "red", aliveForTicks = 15) {
+        this.createParticles((x, y, vx, vy, ticks, color, aliveForTicks) => 
+            new Particle(x, y, vx, vy, ticks, color, aliveForTicks), 
+            amount, tileX, tileY, color, aliveForTicks
+        );
+    }
+
+    createTextParticlesAtTile(damage, tileX, tileY, color = "yellow", aliveForTicks = 15) {
+        this.createParticles((x, y, vx, vy, ticks, color, aliveForTicks) => 
+            new TextParticle(x, y, vx, vy, ticks, color, damage, aliveForTicks), 
+            1, tileX, tileY, color, aliveForTicks
+        );
     }
 
     checkCollisions() {
@@ -361,6 +377,7 @@ class Game {
                         this.entities.arrows = this.entities.arrows.filter(a => a !== arrow);
                         this.createParticlesAtTile(10, monster.x, monster.y, "black");
                         this.createParticlesAtTile(10, monster.x, monster.y, "yellow");
+                        this.createTextParticlesAtTile(10, monster.x, monster.y);
                     }
                 } else if (distance < this.tileSize) {
                     this.entities.arrows = this.entities.arrows.filter(a => a !== arrow);
@@ -371,10 +388,9 @@ class Game {
     }
 
     damageMonster(monster, damage) {
-        console.log(`Monster at ${monster.x}, ${monster.y} with ${monster.hp}hp took ${damage} damage`);
-
         monster.hp -= damage;
         this.createParticlesAtTile(damage, monster.x, monster.y, "red");
+        this.createTextParticlesAtTile(damage, monster.x, monster.y);
 
         if (monster.hp <= 0) {
             this.createParticlesAtTile(monster.startHp, monster.x, monster.y, "red");

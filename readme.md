@@ -11,3 +11,8 @@ This is a Tower Defense game built with HTML5 and JavaScript.
 - Protect your base from the enemies.
 - If an enemy reaches your base, you lose health.
 - If your health reaches 0, you lose the game.
+
+## How to run
+
+1. Clone the repository.
+2. npx http-server
