@@ -4,8 +4,6 @@ export class TextParticle extends Particle {
     constructor(x, y, vx, vy, currentTicks, color, text, aliveForTicks = 25) {
         super(x, y);
 
-        console.log('Creating text particle with text:', text);
-
         this.vx = vx;
         this.vy = vy;
         this.color = color;

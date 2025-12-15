@@ -96,7 +96,6 @@ class Game {
 
     initEventListeners() {
         window.addEventListener('click', (event) => this.handleClick(event));
-        window.addEventListener('keydown', (event) => this.handleKeydown(event));
     }
 
     gameLoop() {
